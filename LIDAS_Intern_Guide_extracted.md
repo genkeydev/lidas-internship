@@ -124,16 +124,33 @@ Duration: ~6–8 hours across the week
 
 This week you set up the repository security controls that protect the project itself — not just the code it produces.
 
-Step 1 · Create the GitHub repository
-• Go to github.com → New repository → name it lidas
-• Do NOT add GitHub’s suggested Python .gitignore — the scaffold already ships a
-  LIDAS-specific .gitignore (data/*, !data/.gitkeep, *.key). Accepting GitHub’s
-  template would overwrite those rules and risk committing the HMAC key or audit log.
-• Choose a licence — MIT is fine for a learning project (or add LICENSE after clone)
+Step 1 · Fork the upstream scaffold
+• Open https://github.com/YOUR_ORG/lidas (mentor will give you the real org name)
+• Click Fork — fork into your own GitHub account (or the assigned org)
+• The fork already includes the scaffold .gitignore — do not replace it
+• Licence: keep/verify LICENSE from upstream; if none exists, add an MIT LICENSE on your fork
 git clone https://github.com/YOUR_USERNAME/lidas.git
-cp -r /path/to/scaffold/* lidas/
-cd lidas && git add . && git commit -m 'chore: initial scaffold'
-git push origin main
+cd lidas
+# Confirm origin points at your fork
+git remote -v
+# Optional but recommended: track upstream so you can pull mentor updates
+git remote add upstream https://github.com/YOUR_ORG/lidas.git
+git fetch upstream
+
+Where do PRs go? (hybrid workflow — learn this now, use it every week)
+• Weekly / day-to-day work: open a PR into your fork’s main (origin). Branch
+  protection and fork CI are your gate — merge only when Checks pass.
+• Milestone handoffs (end of Month 1, Week 6 architecture deliverable, Week 8
+  handoff): after work is on your fork’s main, open a PR into upstream base
+  branch intern/YOUR_USERNAME on YOUR_ORG/lidas — never into upstream main.
+  Example: base repo YOUR_ORG/lidas, base branch intern/alice, head = your fork.
+• Upstream main is mentors only. Do not open PRs targeting it.
+• Mentor creates intern/YOUR_USERNAME on upstream once (from upstream main)
+  before your first milestone PR. Confirm the exact branch name with them.
+• CI: fork Actions = intern gate for weekly merges. The same ci.yml also runs
+  on upstream for pushes to intern/** and PRs into intern/** (org/mentor gate).
+  First milestone PR from a fork may need a mentor to click “Approve and run
+  workflows” on the upstream repo.
 
 Step 2 · Protect the main branch
 • GitHub → Settings → Branches → Add rule → Branch name pattern: main
@@ -165,7 +182,9 @@ every placeholder section with your policy before committing. Include:
 
 Week 2  ·  Secure Git setup  ⚑
 Engineering
-Create GitHub repo, push scaffold, add licence — keep the scaffold .gitignore (do not replace it)
+Fork YOUR_ORG/lidas, clone your fork, confirm remotes (origin = fork; optional upstream)
+Engineering
+Add or verify licence on the fork — keep the scaffold .gitignore (do not replace it)
 Engineering
 Enable branch protection on main — require PR before merge
 ⚑ Security
@@ -176,7 +195,9 @@ Install gitleaks and add pre-commit hook that blocks secret commits
 Complete SECURITY.md template: reporting, HMAC key handling, audit log immutability
 ⚑ Security
 Verify .gitignore: `git check-ignore -v data/hmac.key data/audit.log` must show matches; `data/.gitkeep` must NOT be ignored
-✓  Deliverable: Hardened repo on GitHub, completed SECURITY.md committed
+Engineering
+Confirm you know the hybrid PR rules: weekly → fork main; milestones → upstream intern/YOUR_USERNAME; never upstream main
+✓  Deliverable: Hardened fork on GitHub, completed SECURITY.md committed
 
 Week 3 — TDD: write the test suite
 Duration: ~12–15 hours across the week — this is the heaviest week
@@ -369,8 +390,8 @@ Write docs/log-integrity.md: chain explanation, verification procedure, key leak
 Engineering
 Write docs/log-schema.md: annotated example of each field in the audit log JSON format
 Engineering
-Open a PR for all Month 1 work — review your own diff before merging
-✓  Deliverable: Month 1 complete: spec, threat model, tests, audit log docs — all on GitHub
+Open a PR for all Month 1 work into your fork’s main — review your own diff; merge only when fork CI is green. Then open a milestone PR into upstream intern/YOUR_USERNAME (not upstream main)
+✓  Deliverable: Month 1 complete: spec, threat model, tests, audit log docs — on fork main and synced to upstream intern branch
 
 
   MONTH 2 — Architecture · Patterns · CI/CD · Docker
@@ -478,7 +499,7 @@ Engineering
 Run full test suite — confirm coverage stays at ≥80%
 Engineering
 Write an ADR (Architecture Decision Record) for your new rule in docs/adr/
-✓  Deliverable: Architecture doc, trust boundary diagram, new rule with tests — all on GitHub via PR
+✓  Deliverable: Architecture doc, trust boundary diagram, new rule with tests — merge to fork main via PR, then milestone PR to upstream intern/YOUR_USERNAME
 
 Week 7 — Docker containerisation & hardening
 Duration: ~10–12 hours across the week — you will hit Docker issues; that is expected
@@ -530,15 +551,22 @@ docker compose up
 
 Step 4 · Extend the GitHub Actions CI pipeline
 The scaffold already includes .github/workflows/ci.yml with test and SAST jobs.
+The workflow triggers on push/PR to main and intern/** so the same file is the
+intern gate on your fork and the mentor gate on upstream intern branches.
 Do not replace the whole file from scratch — update it in place:
 • Re-enable the coverage gate on the test job (--cov-fail-under=80) now that Week 3 tests exist
 • Keep the container-scan job’s `if: hashFiles('Dockerfile') != ''` gate (or remove the
   `if:` only after your Dockerfile is committed — never paste a Trivy job that always runs
   before the Dockerfile exists)
+• Keep the on: branches list as main + intern/** (do not broaden to every ref)
 
 Target shape of .github/workflows/ci.yml after Week 7:
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches: [main, "intern/**"]
+  pull_request:
+    branches: [main, "intern/**"]
 
 jobs:
   test:
@@ -584,9 +612,9 @@ Mount the log file read-only (:ro) in docker-compose.yml
 ⚑ Security
 Mount the audit log and HMAC key in a named volume — never in the image
 ⚑ Security
-Extend .github/workflows/ci.yml: coverage gate on, Trivy runs once Dockerfile exists
+Extend .github/workflows/ci.yml: coverage gate on, Trivy runs once Dockerfile exists; keep triggers on main + intern/**
 Engineering
-Push to GitHub — verify all three CI jobs pass in the Actions tab
+Push to your fork — verify CI jobs pass in the Actions tab (fork gate)
 Engineering
 Add the CI status badge to README.md
 ✓  Deliverable: Hardened Docker image, CI pipeline passing on GitHub, status badge in README
@@ -624,10 +652,15 @@ Create CHANGELOG.md at the repo root following the Keep a Changelog format:
 - HMAC key file created with 0600 permissions on first run
 - Audit log is append-only; no read-modify-write possible via CLI
 
-Step 3 · Tag and release on GitHub
+Step 3 · Tag and release on GitHub (on your fork)
 git tag -a v1.0.0 -m 'Release v1.0.0'
 git push origin v1.0.0
-Go to GitHub → Releases → Draft a new release → choose tag v1.0.0. Paste your CHANGELOG entry into the release notes. Attach any relevant benchmark numbers.
+Go to your fork on GitHub → Releases → Draft a new release → choose tag v1.0.0.
+Paste your CHANGELOG entry into the release notes. Attach any relevant benchmark numbers.
+Do not push release tags to upstream main. After the release is on your fork, open a
+milestone handoff PR into upstream intern/YOUR_USERNAME so the org has your final tree.
+If your mentor asks you to tag the upstream intern branch, follow their instructions —
+still never tag or release against upstream main.
 
 Step 4 · OWASP Dependency-Check (stretch goal)
 Run OWASP Dependency-Check against the project to verify there are no known vulnerable dependencies (LIDAS has no runtime Python deps, so this should be clean):
@@ -640,7 +673,7 @@ Prepare a 15-minute walkthrough covering:
 • The threat model: what threats you identified and how LIDAS addresses each
 • The HMAC chain: live demo of tamper detection using the CLI
 • The rule engine: explain the sliding window algorithm in your own words
-• The CI pipeline: show a passing pipeline run in the GitHub Actions tab
+• The CI pipeline: show a passing pipeline run on your fork, and (if available) on the upstream intern branch
 • What you would do differently if you started again
 • What you want to build in Month 3 (integration tests, hardened chain verification, SIEM integration)
 
@@ -650,14 +683,14 @@ Update __version__ to 1.0.0 in lidas/__init__.py
 ⚑ Security
 Write CHANGELOG.md with all features and security items from Months 1–2
 Engineering
-Tag v1.0.0 and publish a GitHub Release with release notes and benchmark numbers
+Tag v1.0.0 and publish a GitHub Release on your fork (not upstream main); then open handoff PR to upstream intern/YOUR_USERNAME
 ⚑ Security
 Run OWASP Dependency-Check and link the clean report in the release notes
 ⚑ Security
 Verify the final audit log chain is intact after all test runs: `python -m lidas.cli verify data/audit.log`
 Engineering
 Prepare and deliver 15-minute retrospective to mentor
-✓  Deliverable: v1.0.0 released on GitHub with signed tag, CHANGELOG, benchmark results, and clean dep-check
+✓  Deliverable: v1.0.0 on your fork with CHANGELOG and benchmarks; milestone handoff on upstream intern branch
 
 Evaluation criteria
 Your mentor will assess the following at the end of Month 2:

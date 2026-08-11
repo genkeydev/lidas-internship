@@ -17,6 +17,9 @@ from the CLI.
 
 ## Quick start
 
+1. Fork `https://github.com/YOUR_ORG/lidas` on GitHub (mentor provides the real org).
+2. Clone **your fork**, then run:
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/lidas.git
 cd lidas
@@ -25,6 +28,18 @@ pytest tests/ -v
 python -m lidas.cli scan fixtures/sample_ssh.log
 python -m lidas.cli verify data/audit.log
 ```
+
+The CI badge above points at your fork’s Actions once you replace `YOUR_USERNAME`.
+
+## Git / PR workflow
+
+| Work | PR target |
+|------|-----------|
+| Weekly / day-to-day | Your **fork’s `main`** (intern gate — fork CI must pass) |
+| Milestones (Month 1, Week 6, Week 8 handoff) | Upstream **`YOUR_ORG/lidas`** branch **`intern/YOUR_USERNAME`** |
+| Never | Upstream **`main`** (mentors only) |
+
+CI: the same `.github/workflows/ci.yml` runs on `main` and `intern/**`. Fork Actions are your day-to-day gate; upstream Actions on `intern/*` validate milestone PRs.
 
 ## Detection rules
 
@@ -92,12 +107,12 @@ lidas/
 | Week | You create / complete |
 |------|------------------------|
 | 1 | `docs/SPEC.md`, `docs/THREAT_MODEL.md` (create) |
-| 2 | GitHub hardening, complete `SECURITY.md` template, licence — keep scaffold `.gitignore` |
+| 2 | Fork upstream → harden fork; learn hybrid PRs (fork `main` weekly; upstream `intern/YOU` for milestones) |
 | 3 | Extend test stubs; fuzz cases; ≥80% coverage (`fail_under` in pyproject.toml) |
-| 4 | `docs/log-integrity.md`, `docs/log-schema.md` (create) |
+| 4 | `docs/log-integrity.md`, `docs/log-schema.md`; Month 1 PR → fork `main`, then upstream `intern/YOU` |
 | 5 | `scripts/benchmark.py`, `docs/BENCHMARKS.md` (create) |
-| 6 | `docs/ARCHITECTURE.md`, new detection rule (extend `rules.py`) |
-| 7 | `Dockerfile`, `docker-compose.yml`; extend CI (coverage gate + Trivy) |
-| 8 | `CHANGELOG.md`, v1.0.0 release |
+| 6 | `docs/ARCHITECTURE.md`, new rule; PR → fork `main`, then upstream `intern/YOU` |
+| 7 | `Dockerfile`, `docker-compose.yml`; extend CI (coverage + Trivy; triggers on `main` + `intern/**`) |
+| 8 | `CHANGELOG.md`, v1.0.0 release on fork; handoff PR to upstream `intern/YOU` |
 
-See **LIDAS_Intern_Guide** in the parent `Interns/` folder for the full checklist.
+See **LIDAS_Intern_Guide** (in this repo or provided by your mentor) for the full checklist.
