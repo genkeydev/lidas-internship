@@ -295,24 +295,32 @@ class PortScanHintRule(Rule):
         self.window = window
         self._hits: dict[str, deque] = defaultdict(deque)
         self._alerted_until: dict[str, datetime] = {}
+        self._seen_ips: set[str] = set()
 
     def process(self, event: LogEvent) -> list[Alert]:
         if event.source != "http" or event.status != "404" or event.source_ip is None:
             return []
-
+        
         ip = event.source_ip
+        
         bucket = self._hits[ip]
+        
+        if ip not in self._seen_ips:
+            self._seen_ips.add(ip)
+            bucket.append(event.timestamp)
+            return []
+        
         bucket.append(event.timestamp)
 
         cutoff = event.timestamp - self.window
         while bucket and bucket[0] < cutoff:
-            bucket.popleft()
-
-        if len(bucket) < self.threshold:
-            return []
-
+            bucket.popleft()    
+            
         until = self._alerted_until.get(ip)
         if until is not None and event.timestamp < until:
+            return []
+        
+        if len(bucket) < self.threshold:
             return []
 
         self._alerted_until[ip] = event.timestamp + self.window
@@ -332,6 +340,74 @@ class PortScanHintRule(Rule):
             )
         ]
 
+class HTTP401CredentialStuffingRule(Rule):
+    """HTTP-004: Credential stuffing via repeated 401 Unauthorized responses.
+
+    Tracks 401 responses per IP within a sliding time window. Fires when
+    the number of 401s from a single IP exceeds threshold within the window.
+    """
+
+    def __init__(self, threshold: int = 10, window: timedelta = timedelta(seconds=60)):
+        super().__init__()
+        self.rule_id = "HTTP-004"
+        self.rule_name = "Repeated 401 responses (credential stuffing)"
+        self.severity = Severity.HIGH
+        self.threshold = threshold
+        self.window = window
+        self._attempts: dict[str, deque] = {}
+        self._alerted_until: dict[str, datetime] = {}
+        self._seen_ips: set[str] = set()   # optimization: new IPs skip eviction
+
+    def process(self, event: LogEvent) -> list[Alert]:
+        if event.source != "http" or event.status != "401" or event.source_ip is None:
+            return []
+
+        ip = event.source_ip
+
+        # Get or create the deque for this IP
+        bucket = self._attempts.setdefault(ip, deque())
+
+        # Optimisation: first time seeing this IP → no eviction needed
+        if ip not in self._seen_ips:
+            self._seen_ips.add(ip)
+            bucket.append(event.timestamp)
+            return []
+
+        # Known IP: append timestamp
+        bucket.append(event.timestamp)
+
+        # Evict entries older than the window
+        cutoff = event.timestamp - self.window
+        while bucket and bucket[0] < cutoff:
+            bucket.popleft()
+
+        # Cooldown check (after eviction so bucket stays fresh)
+        until = self._alerted_until.get(ip)
+        if until is not None and event.timestamp < until:
+            return []
+
+        # Threshold check
+        if len(bucket) < self.threshold:
+            return []
+
+        # Alert! Update cooldown and return Alert
+        self._alerted_until[ip] = event.timestamp + self.window
+        return [
+            Alert(
+                rule_id=self.rule_id,
+                rule_name=self.rule_name,
+                severity=self.severity,
+                timestamp=event.timestamp,
+                source_ip=ip,
+                confidence=0.9,
+                summary=(
+                    f"{len(bucket)} HTTP 401 responses from {ip} within "
+                    f"{int(self.window.total_seconds())}s"
+                ),
+                evidence=[event.raw],
+            )
+        ]
+
 
 # Add new rule classes here to include them in the default engine. Order
 # matters only if rules share state, which the current rules do not.
@@ -341,6 +417,7 @@ DEFAULT_RULES: list[type[Rule]] = [
     SuspiciousUserAgentRule,
     CanaryTokenRule,
     PortScanHintRule,
+    HTTP401CredentialStuffingRule,
 ]
 
 

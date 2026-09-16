@@ -120,7 +120,7 @@ class AuditLogVerifier:
 
         prev_hmac = GENESIS_HMAC
         with path.open("r", encoding="utf-8") as f:
-            for line_no, line in enumerate(f, start=1):
+            for line_no, line in enumerate(f, start=0):
                 if not line.strip():
                     continue
                 try:

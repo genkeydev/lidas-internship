@@ -1,0 +1,15 @@
+services:
+  lidas:
+    build: .
+    working_dir: /app
+    volumes:
+      - ./fixtures:/logs:ro
+      - lidas-data:/app/data
+    environment:
+      - LIDAS_AUDIT_LOG_PATH=/app/data/audit.log
+      - LIDAS_KEY_PATH=/app/data/hmac.key
+      - PYTHONPATH=/app
+    command: ['scan', '/logs/sample_ssh.log']
+
+volumes:
+  lidas-data:
