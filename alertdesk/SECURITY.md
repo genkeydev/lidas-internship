@@ -1,29 +1,20 @@
 # Security Policy
 
-> **Week 2 task:** Replace the placeholders below with your own policy.
-> Delete this callout when you commit the finished file.
+
 
 ## Reporting a vulnerability
 
-<!-- TODO: How should someone report a vulnerability in AlertDesk itself? -->
-
-[Describe your reporting process here.]
+If you  find a vulnerability  in the system report it privately to the maintainer, don't share sensitive data publicly  
 
 ## Authentication (scaffold vs Month 4)
 
-<!-- TODO: Document that tokens in client-spec.json are a stub, not production auth -->
-<!-- Cover: never use these tokens outside the lab; replace in Month 4 -->
 
-[Describe auth handling here.]
+Current lab uses stub tokens, proper authentication is planned for Month 4.  And tokens are not used outside the lab. 
 
 ## Database and audit log
 
-<!-- TODO: Document ALERTDESK_DB, append-only audit_events, backups -->
-
-[Describe data handling here.]
+The database stores tickets, and the audit log records actions, and no sensitive secrets go in those logs
 
 ## Scope limitations
 
-<!-- TODO: AlertDesk is not a full SOAR/SIEM; known OWASP gaps in the stub -->
-
-[Describe scope and limitations here.]
+This policy applies to the alert desk internship environment. It uses stub tokens for testing only, not for production, and should not be used for real security incidents.
