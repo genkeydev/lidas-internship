@@ -49,7 +49,12 @@ def test_analyst_cannot_transition(client: TestClient):
 
     assert res.status_code == 403
 
-@pytest.mark.skip(reason="Week 3 — implement unknown bearer token")
-def test_unknown_token_is_401():
-    pass
+
+def test_unknown_token_is_401(client: TestClient):
+    res = client.get(
+        "/tickets",
+        headers={"Authorization": "Bearer fake-token"},
+    )
+
+    assert res.status_code == 401
  
