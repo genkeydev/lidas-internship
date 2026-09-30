@@ -85,3 +85,25 @@ def test_assign_then_triaged_transition(client: TestClient):
     )
 
     assert transitioned.status_code == 200
+
+def test_invalid_severity_is_400(client: TestClient):
+     res = client.post(
+        "/tickets",
+        json={"title": "Invalid severity", "severity": "urgent"},
+        headers={"Authorization": "Bearer admin-token"},
+    )
+
+     assert res.status_code == 400
+
+
+def test_malformed_json_is_rejected(client: TestClient):
+    res = client.post(
+        "/tickets",
+        content='{"title": "Broken JSON", "severity": "high"',
+        headers={
+            "Authorization": "Bearer admin-token",
+            "Content-Type": "application/json",
+        },
+    )
+
+    assert res.status_code == 422
