@@ -57,4 +57,31 @@ def test_unknown_token_is_401(client: TestClient):
     )
 
     assert res.status_code == 401
- 
+
+
+def test_assign_then_triaged_transition(client: TestClient):
+    created = client.post(
+        "/tickets",
+        json={"title": "Assigned ticket", "severity": "high"},
+        headers={"Authorization": "Bearer admin-token"},
+    )
+
+    assert created.status_code == 200
+
+    ticket_id = created.json()["id"]
+
+    assigned = client.post(
+        f"/tickets/{ticket_id}/assign",
+        json={"assignee": "analyst"},
+        headers={"Authorization": "Bearer admin-token"},
+    )
+
+    assert assigned.status_code == 200
+
+    transitioned = client.post(
+        f"/tickets/{ticket_id}/transition",
+        json={"status": "triaged"},
+        headers={"Authorization": "Bearer admin-token"},
+    )
+
+    assert transitioned.status_code == 200
