@@ -1,0 +1,179 @@
+1. Purpose
+
+This document defines the functional requirements for AlertDesk. These requirements describe the functions the service must provide based on the current client brief and configuration-driven workflow requirement.
+
+2. Functional Requirements
+
+ID
+
+Function Requirement
+
+FR-01
+
+Create ticket
+
+The system shall allow an authorized analyst to create a security ticket.
+
+FR-02
+
+Ticket information
+
+The system shall allow a ticket to contain a title, description, and severity.
+
+FR-03
+
+Severity selection
+
+The system shall allow ticket severity to be selected from the values defined by the client specification.
+
+FR-04
+
+List tickets
+
+The system shall allow an authorized analyst to list/retrieve security tickets.
+
+FR-05
+
+Get ticket
+
+The system shall allow an authorized analyst to retrieve the details of an individual ticket.
+
+FR-06
+
+Assign ticket
+
+The system shall allow an authorized analyst to assign a ticket to an analyst identifier, such as an email address or handle.
+
+FR-07
+
+Change ticket status
+
+The system shall allow only authorized Lead and Admin roles to change a ticket status.
+
+FR-08
+
+Validate status transition
+
+The system shall reject a ticket-status change when the transition is not defined as legal in the client specification.
+
+FR-09
+
+Configuration-driven workflow
+
+The system shall obtain ticket statuses, roles, severity values, and legal status transitions from the client JSON specification rather than hardcoding them in Python.
+
+FR-10
+
+Role-based authorization
+
+The system shall enforce permissions according to the authenticated user’s role.
+
+FR-11
+
+Audit ticket creation
+
+The system shall record ticket-creation actions in an append-only audit trail.
+
+FR-12
+
+Audit assignment
+
+The system shall record ticket-assignment actions in an append-only audit trail.
+
+FR-13
+
+Audit status transition
+
+The system shall record ticket-status transitions in an append-only audit trail.
+
+FR-14
+
+Audit actor and time
+
+The system shall record who performed an audited action and when it occurred.
+
+FR-15
+
+API service
+
+The system shall expose the ticket functions through a web service/API rather than a CLI-only interface.
+
+FR-16
+
+OpenAPI documentation
+
+The running application shall expose OpenAPI documentation describing the available API operations and schemas.
+
+3. Role Permissions
+
+Role         Create        List/Get     Assign      Change status
+
+Analyst      Yes           Yes           Yes           No
+
+Lead         Yes           Yes           Yes          Yes
+
+Admin        Yes           Yes           Yes           Yes
+
+4. Current Sample Workflow
+
+The current sample workflow is:
+
+New → Triaged → Assigned → Resolved → Closed
+
+The application shall not allow arbitrary status jumps. The legal transitions must be read from the JSON specification.
+
+5. Acceptance Criteria
+
+.Area
+
+.Acceptance criterion
+
+.Ticket creation
+
+An authorized analyst can create a ticket with a title, description, and a valid client-defined severity.
+
+Ticket retrieval
+
+An authorized analyst can list tickets and retrieve an individual ticket.
+
+Assignment
+
+An authorized analyst can assign a ticket to an analyst identifier.
+
+Status authorization
+
+An Analyst cannot change status; a Lead or Admin can change status when otherwise valid.
+
+Transition validation
+
+An attempted illegal status transition is rejected.
+
+Audit trail
+
+Creating, assigning, or transitioning a ticket creates an append-only audit record identifying the actor and time.
+
+Configuration
+
+Changing the client JSON specification can change supported statuses/roles/transitions without hardcoding those values in Python.
+
+OpenAPI
+
+The running service exposes its API contract through OpenAPI documentation.
+
+6. Functional Scope Exclusions
+
+Slack integration
+
+SIEM connectors
+
+Single Sign-On (SSO)
+
+Multi-region operation
+
+7. Important Implementation Rule
+
+The client specification is the source of truth for configurable workflow elements. Application code and tests should use the current specification rather than duplicating status or role values as hardcoded Python enums.
+
+8. Summary
+
+AlertDesk must provide a service for creating, viewing, assigning, and progressing security tickets. It must enforce role permissions, reject illegal status transitions, maintain an append-only audit trail, and expose OpenAPI documentation. The workflow and role rules must remain configurable through the client specification.
