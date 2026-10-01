@@ -95,11 +95,63 @@ class SchemaValidatorTest {
                 Map.of("app.port", "integer"),
                 Map.of(),
                 "override"
-    );
+        );
 
         List<ValidationIssue> issues =
                 SchemaValidator.validate(document, spec);
 
-    assertTrue(issues.isEmpty());
+        assertTrue(issues.isEmpty());
+    }
+
+    @Test
+    void emptyObjectWithoutRequirementsIsValid() {
+        ConfigDocument document = new ConfigDocument(Map.of());
+
+        ClientSpec spec = new ClientSpec(
+                "1.0",
+                "GenKey",
+                List.of(),
+                Map.of(),
+                Map.of(),
+                "override"
+        );
+
+        List<ValidationIssue> issues =
+                SchemaValidator.validate(document, spec);
+
+        assertTrue(issues.isEmpty());
+    }
+
+    @Test
+    void largeNestedDocumentCanBeValidated() {
+        Map<String, Object> nested = Map.of(
+                "value", "present"
+        );
+
+        String path = "value";
+
+        for (int level = 99; level >= 0; level--) {
+            nested = Map.of(
+                    "level" + level,
+                    nested
+            );
+            path = "level" + level + "." + path;
+        }
+
+        ConfigDocument document = new ConfigDocument(nested);
+
+        ClientSpec spec = new ClientSpec(
+                "1.0",
+                "GenKey",
+                List.of(path),
+                Map.of(path, "string"),
+                Map.of(),
+                "override"
+        );
+
+        List<ValidationIssue> issues =
+                SchemaValidator.validate(document, spec);
+
+        assertTrue(issues.isEmpty());
     }
 }

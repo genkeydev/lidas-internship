@@ -1,9 +1,12 @@
 package com.genkey.configmaster;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -64,25 +67,50 @@ class ConfigMasterCliTest {
     }
 
     @Test
-    void showReturnsZeroForValidConfig() throws Exception {
+    void showReturnsZeroAndPrintsMergedJsonForValidConfig() throws Exception {
         Path spec = writeSpec();
-        Path config = tempDir.resolve("show.json");
+        Path defaults = tempDir.resolve("defaults.json");
+        Path overlay = tempDir.resolve("overlay.json");
 
-        Files.writeString(config, """
+        Files.writeString(defaults, """
                 {
                   "app": {
-                    "port": 8080
+                    "port": 8080,
+                    "name": "configmaster"
                   }
                 }
                 """);
 
-        int exitCode = ConfigMasterCli.run(new String[]{
-                "show",
-                "--spec", spec.toString(),
-                config.toString()
-        });
+        Files.writeString(overlay, """
+                {
+                  "app": {
+                    "port": 9090
+                  }
+                }
+                """);
 
-        assertEquals(0, exitCode);
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream capturedOut = new ByteArrayOutputStream();
+
+        try {
+            System.setOut(new PrintStream(capturedOut));
+
+            int exitCode = ConfigMasterCli.run(new String[]{
+                    "show",
+                    "--spec", spec.toString(),
+                    defaults.toString(),
+                    overlay.toString()
+            });
+
+            assertEquals(0, exitCode);
+        } finally {
+            System.setOut(originalOut);
+        }
+
+        String output = capturedOut.toString();
+
+        assertTrue(output.contains("\"port\" : 9090"));
+        assertTrue(output.contains("\"name\" : \"configmaster\""));
     }
 
     @Test
