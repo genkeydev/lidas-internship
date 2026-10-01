@@ -80,7 +80,7 @@
               <goal>report</goal>
             </goals>
           </execution>
-          <!-- Week 3: uncomment the check execution after coverage reaches ≥80%.
+
           <execution>
             <id>check</id>
             <goals>
@@ -101,7 +101,7 @@
               </rules>
             </configuration>
           </execution>
-          -->
+          
         </executions>
       </plugin>
     </plugins>
