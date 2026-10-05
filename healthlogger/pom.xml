@@ -80,7 +80,7 @@
               <goal>report</goal>
             </goals>
           </execution>
-          <!-- Week 3: uncomment check after ≥80% coverage.
+          <!-- Week 3: JaCoCo coverage check enabled; minimum 80% coverage. -->
           <execution>
             <id>check</id>
             <goals>
@@ -101,7 +101,7 @@
               </rules>
             </configuration>
           </execution>
-          -->
+
         </executions>
       </plugin>
     </plugins>
