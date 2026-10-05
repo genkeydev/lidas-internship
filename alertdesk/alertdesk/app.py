@@ -9,8 +9,11 @@ from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from . import db
+from .observability import RequestLoggingMiddleware, configure_logging
 from .auth import require
 from .spec import can_transition
+
+configure_logging()
 
 
 @asynccontextmanager
@@ -27,6 +30,8 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+app.add_middleware(RequestLoggingMiddleware)
 
 
 class TicketCreate(BaseModel):
