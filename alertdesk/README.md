@@ -33,6 +33,13 @@ curl -s -H "Authorization: Bearer analyst-token" \
 
 Lead token `lead-token` may transition; `analyst-token` may not.
 
+## Run with Docker Compose
+
+From this directory, run `docker compose up --build`. Compose exposes the API
+on port 8000 and keeps SQLite data in the named `alertdesk-data` volume. See
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for persistence and schema-change
+notes.
+
 ## Git / PR workflow
 
 | Work | PR target |

@@ -1,29 +1,61 @@
 # Security Policy
 
-> **Week 2 task:** Replace the placeholders below with your own policy.
-> Delete this callout when you commit the finished file.
-
 ## Reporting a vulnerability
 
-<!-- TODO: How should someone report a vulnerability in AlertDesk itself? -->
+If you find a vulnerability in AlertDesk, report it privately to the
+maintainer:
 
-[Describe your reporting process here.]
+- **Name:** George
+- **Email:** baningeorge@gmail.com
+
+Do not publicly disclose vulnerabilities or include sensitive information
+in public issues.
 
 ## Authentication (scaffold vs Month 4)
 
-<!-- TODO: Document that tokens in client-spec.json are a stub, not production auth -->
-<!-- Cover: never use these tokens outside the lab; replace in Month 4 -->
+The current lab uses stub bearer tokens for authentication.
 
-[Describe auth handling here.]
+The lab tokens and their associated roles are defined in:
+
+`config/client-spec.json`
+
+These tokens are intended for the internship lab environment only and
+must not be reused as production credentials.
+
+Proper authentication is planned for Month 4.
 
 ## Database and audit log
 
-<!-- TODO: Document ALERTDESK_DB, append-only audit_events, backups -->
+AlertDesk stores ticket data in the configured SQLite database.
 
-[Describe data handling here.]
+The database location is controlled by the `ALERTDESK_DB` environment
+variable.
+
+Security-relevant actions are recorded in the append-only
+`audit_events` table. At minimum, ticket creation, assignment, and
+status transitions are audited.
+
+Audit logs must not contain passwords, bearer tokens, or other sensitive
+secrets.
+
+Database backups should be performed according to the deployment
+environment's backup and recovery requirements.
 
 ## Scope limitations
 
-<!-- TODO: AlertDesk is not a full SOAR/SIEM; known OWASP gaps in the stub -->
+This security policy applies to the AlertDesk internship/scaffold
+environment.
 
-[Describe scope and limitations here.]
+AlertDesk is **not a SOAR (Security Orchestration, Automation and
+Response) platform or a SIEM (Security Information and Event Management)
+platform**.
+
+The scaffold uses stub tokens for testing only and should not be used
+for real security incidents or production security operations.
+
+The following are outside the current scaffold scope:
+
+- Slack integration
+- SIEM connectors
+- SSO
+- Multi-region operation 

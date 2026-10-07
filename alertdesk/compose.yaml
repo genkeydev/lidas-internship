@@ -1,0 +1,12 @@
+services:
+  alertdesk:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - alertdesk-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  alertdesk-data:
