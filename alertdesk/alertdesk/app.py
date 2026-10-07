@@ -9,8 +9,11 @@ from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from . import db
+from .observability import RequestLoggingMiddleware, configure_logging
 from .auth import require
 from .spec import can_transition
+
+configure_logging()
 
 
 @asynccontextmanager
@@ -24,9 +27,11 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(
     title="AlertDesk",
     description="Security alert and ticket intake. Statuses and roles come from client-spec.json.",
-    version="0.1.0",
+    version="1.0.0",
     lifespan=lifespan,
 )
+
+app.add_middleware(RequestLoggingMiddleware)
 
 
 class TicketCreate(BaseModel):
