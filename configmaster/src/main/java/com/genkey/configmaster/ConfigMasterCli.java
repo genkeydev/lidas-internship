@@ -1,12 +1,12 @@
 package com.genkey.configmaster;
 
-import com.genkey.configmaster.model.ConfigDocument;
-import com.genkey.configmaster.model.MergeResult;
-import com.genkey.configmaster.model.ValidationIssue;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.genkey.configmaster.model.ConfigDocument;
+import com.genkey.configmaster.model.MergeResult;
+import com.genkey.configmaster.model.ValidationIssue;
 
 /**
  * Command-line interface.
@@ -56,6 +56,8 @@ public final class ConfigMasterCli {
         }
 
         ClientSpec spec = Loader.loadSpec(specPath);
+        spec.validateSchemaVersion();
+
         List<ConfigDocument> layers = new ArrayList<>();
         for (Path file : files) {
             layers.add(Loader.loadJson(file));
