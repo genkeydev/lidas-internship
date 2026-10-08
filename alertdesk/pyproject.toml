@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "alertdesk"
-version = "0.1.0"
+version = "1.0.0"
 description = "Security alert and ticket intake — Year 2 Cybersecurity Capstone"
 requires-python = ">=3.12"
 dependencies = [

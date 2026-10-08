@@ -27,7 +27,7 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(
     title="AlertDesk",
     description="Security alert and ticket intake. Statuses and roles come from client-spec.json.",
-    version="0.1.0",
+    version="1.0.0",
     lifespan=lifespan,
 )
 

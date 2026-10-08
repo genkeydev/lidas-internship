@@ -1,7 +1,8 @@
 # AlertDesk
 
 Intern capstone scaffold for the **AlertDesk Intern Guide** (Year 2 cybersecurity,
-8 weeks). Documentation deliverables are intern-written; the API core runs today.
+8 weeks), version **1.0.0**. Documentation deliverables are intern-written;
+the API core runs today.
 
 ![CI](https://github.com/YOUR_USERNAME/capstone/actions/workflows/alertdesk.yml/badge.svg)
 
@@ -64,3 +65,9 @@ Lead token `lead-token` may transition; `analyst-token` may not.
 | 8 | CHANGELOG, v1.0.0, incident playbook, handoff |
 
 See **AlertDesk_Intern_Guide.md**.
+
+## Release and operations
+
+- [CHANGELOG](CHANGELOG.md) records the 1.0.0 release scope.
+- [Incident playbook](docs/INCIDENT_PLAYBOOK.md) covers response for this lab
+  service.
