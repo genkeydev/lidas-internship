@@ -25,13 +25,32 @@ JSON while logs are written to stderr.
   (defaults, then environment overlay, then an optional local override)
 - Deep-merging the loaded layers into one effective document
 - Field-level merge behavior read from the schema at runtime:
-  `append_list` for fields like `app.features`,
-  `fail_on_conflict` for fields like `app.region`,
-  and `override` (later layer wins) as the default for everything else
+  `append_list` for list fields that should be combined across layers,
+  `fail_on_conflict` for fields that must not silently change between layers,
+  and `override` when the later layer should replace the earlier value
 - Validating the effective document against the required fields and types
   defined in `config/client-spec.json`
 - Three commands: `validate`, `merge`, and `show`, all of which load and merge
   the given files before acting
+
+The exact field paths come from the active client specification. ConfigMaster
+must not depend on Northwind-specific sample paths or hard-code client field
+names in Java.
+
+### Supported field types
+
+`fieldTypes` supports the following type names:
+
+- `string`
+- `integer`
+- `number`
+- `boolean`
+- `array`
+- `object`
+
+If the client specification contains an unsupported type name, the
+specification must be treated as invalid. An unknown type name must not silently
+disable validation for that field.
 
 ### Out of scope for v1
 
@@ -101,3 +120,8 @@ The CLI parses the specification on every invocation of `validate`, `merge`, or
 `show`. Field names, types, and required properties are read at runtime, so
 adopting a schema change means replacing the specification file without adding
 those field names to the Java implementation.
+
+A replacement specification can reuse the supported field types and merge
+strategies without changing Java code. If a future specification introduces a
+new field type or merge behavior, support for that behavior must be implemented
+explicitly rather than being silently accepted.
