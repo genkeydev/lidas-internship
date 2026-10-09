@@ -85,15 +85,35 @@ def test_assign_then_triaged_transition(client: TestClient):
     )
 
     assert transitioned.status_code == 200
+    assert assigned.json()["assignee"] == "analyst"
+    assert transitioned.json()["assignee"] == "analyst"
+    assert transitioned.json()["status"] == "triaged"
+
+
+def test_extra_ticket_fields_are_ignored(client: TestClient):
+    res = client.post(
+        "/tickets",
+        json={
+            "title": "Ticket with extra field",
+            "severity": "high",
+            "unexpected": "ignored",
+        },
+        headers={"Authorization": "Bearer admin-token"},
+    )
+
+    assert res.status_code == 200
+    assert res.json()["title"] == "Ticket with extra field"
+    assert "unexpected" not in res.json()
+
 
 def test_invalid_severity_is_400(client: TestClient):
-     res = client.post(
+    res = client.post(
         "/tickets",
         json={"title": "Invalid severity", "severity": "urgent"},
         headers={"Authorization": "Bearer admin-token"},
     )
 
-     assert res.status_code == 400
+    assert res.status_code == 400
 
 
 def test_malformed_json_is_rejected(client: TestClient):
